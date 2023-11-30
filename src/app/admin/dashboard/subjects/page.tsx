@@ -134,14 +134,14 @@ const Content = () => {
               console.log('week value => ', value)
               setWeek(value)
             }}>
-              <Stack spacing={[1, 5]} direction={['column', 'row']}>
+              <div className="grid grid-cols-3 gap-4">
                 <Checkbox value='monday'>Monday</Checkbox>
                 <Checkbox value='tuesday'>Tuesday</Checkbox>
                 <Checkbox value='wednesday'>Wednesday</Checkbox>
                 <Checkbox value='thursday'>Thursday</Checkbox>
                 <Checkbox value='friday'>Friday</Checkbox>
                 <Checkbox value='saturday'>Saturday</Checkbox>
-              </Stack>
+              </div>
             </CheckboxGroup>
             <Stack spacing={6}>
               <Stack
