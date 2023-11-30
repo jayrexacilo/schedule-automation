@@ -99,7 +99,6 @@ const Content = () => {
       method: 'GET'
     });
     const data = await get.json();
-    console.log('get => ', data);
     if(data?.length) {
       setTeachers(data);
       return;
@@ -112,7 +111,6 @@ const Content = () => {
       method: 'GET'
     });
     const data = await get.json();
-    console.log('get subjects => ', data);
     if(data?.length) {
       setSubjects(data);
       return;
@@ -122,15 +120,6 @@ const Content = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('e => ', e);
-    //const add = await fetch('/api/teachers/add', {
-    //  method: "POST",
-    //  body: JSON.stringify({
-    //    firstname: formData.get('firstname'),
-    //    lastname: formData.get('lastname'),
-    //  })
-    //});
-    //console.log('add => ', add);
     if(data.filter(i => i.subject.value === selectedSubject.value)?.length) {
       toast({
           title: 'Subject already added.',
@@ -168,22 +157,18 @@ const Content = () => {
   };
 
   const handleGenerate = () => {
-    console.log('data => ', data);
-    console.log('teachers => ', teachers);
-    console.log('subject => ', subjects);
     let schedules = [];
     const _selectedSubjects = data.map(i => i.subject.value);
     const _subjects = subjects.filter(i => _selectedSubjects.includes(i.id))
-    console.log('_subjects => ', _subjects);
     let time = moment().set('hour', 7).set('minutes', 0);
     let totalTime = 0;
-    _subjects.map(i => {
+    let hasBreak = false;
+    _subjects.map((i, idx) => {
       const getAssignedTeacher = data.filter(i2 => {
         return i2.subject.value === i.id;
       })
-      console.log('ass teach => ', getAssignedTeacher);
-      console.log('i subjects => ', i);
-      if(totalTime >= 5) {
+      if(totalTime >= 4 && !hasBreak) {
+        hasBreak = true;
         time = moment(time).add(1, 'h');
         schedules.push({
           isBreak: true,
@@ -197,28 +182,38 @@ const Content = () => {
       let startTime = time;
       let endTime = moment(startTime).add(i.time_allocation, 'h');
       totalTime += i.time_allocation;
-      console.log('time A=> ', startTime.format('hh:mm a'));
-      console.log('time A=>2 ', endTime.format('hh:mm a'));
       schedules.push({
+        subject_id: i.id,
         subject: i.label,
         startTime: moment(startTime).format('hh:mm a'),
         endTime: moment(endTime).format('hh:mm a'),
         week: i.week,
-        assignedTeacher: getAssignedTeacher[0].teacher.label
+        assignedTeacher: getAssignedTeacher[0].teacher.label,
+        teacher_id: getAssignedTeacher[0].teacher.value,
+        room: `ROOM10${idx}`
       });
       time = endTime;
-      console.log('time => ', time.format('hh:mm a'));
     });
-    console.log('schedules => ', schedules);
     setSchedules(schedules);
     //getSubjects();
   };
 
-  console.log('teachers => ', teachers);
-  console.log('subjects => ', subjects);
-  console.log('data => ', data);
-  console.log('selectedSubject => ', selectedSubject);
-  console.log('selectedTeacher => ', selectedTeacher);
+  const handleSaveSchedule = async () => {
+    const add = await fetch('/api/schedules/add', {
+      method: "POST",
+      body: JSON.stringify(schedules?.filter(i => !i.isBreak))
+    });
+
+    setData([]);
+    setSchedules([]);
+    toast({
+        title: 'Schedule Successfully Saved!',
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+        position: 'top'
+      })
+  };
 
   if(!isClient) return null;
 
@@ -231,6 +226,7 @@ const Content = () => {
               <FormControl id="code">
                 <FormLabel>Subject</FormLabel>
                 <Select
+                  isRequired
                   {...selectSubjectProps}
                   options={subjects.map(i => ({label: i.subject_code +' - '+i.label, value: i.id}))}
                   //name="subject"
@@ -241,6 +237,7 @@ const Content = () => {
               <FormControl>
                 <FormLabel>Teacher</FormLabel>
                 <Select
+                  isRequired
                   {...selectTeacherProps}
                   options={teachers.map(i => ({label: i.firstname+' - '+i.lastname, value: i.id}))}
                   //name="teachers"
@@ -286,6 +283,7 @@ const Content = () => {
       <Box width={"full"}>
         <TableContainer>
           <Heading>Schedule</Heading>
+          <Button className="mt-4 mb-2" onClick={handleSaveSchedule}>Save Schedule</Button>
           <Table variant='simple'>
             <Thead>
               <Tr>
