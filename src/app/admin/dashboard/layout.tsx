@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useState, useEffect } from 'react';
 import {
   IconButton,
   Avatar,
@@ -31,8 +32,9 @@ import {
   FiChevronDown,
 } from 'react-icons/fi'
 import { IconType } from 'react-icons'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import axios, { AxiosError } from "axios";
 
 interface LinkItemProps {
   name: string
@@ -136,6 +138,11 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
 }
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
+  const { push } = useRouter();
+  const handleSignOut = async () => {
+    const logout = await axios.get('/api/auth/logout');
+    push('/');
+  };
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -164,7 +171,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       </Text>
 
       <HStack spacing={{ base: '0', md: '6' }}>
-        <IconButton size="lg" variant="ghost" aria-label="open menu" icon={<FiBell />} />
+        {/*<IconButton size="lg" variant="ghost" aria-label="open menu" icon={<FiBell />} />*/}
         <Flex alignItems={'center'}>
           <Menu>
             <MenuButton py={2} transition="all 0.3s" _focus={{ boxShadow: 'none' }}>
@@ -193,11 +200,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
             <MenuList
               bg={useColorModeValue('white', 'gray.900')}
               borderColor={useColorModeValue('gray.200', 'gray.700')}>
-              <MenuItem>Profile</MenuItem>
-              <MenuItem>Settings</MenuItem>
-              <MenuItem>Billing</MenuItem>
-              <MenuDivider />
-              <MenuItem>Sign out</MenuItem>
+              <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
             </MenuList>
           </Menu>
         </Flex>
@@ -208,6 +211,28 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
 
 const SidebarWithHeader = ({children}) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const { push } = useRouter();
+
+  useEffect(() => {
+    (async () => {
+      const { user, error } = await getUser();
+
+      console.log('user =>' ,user);
+      console.log('error =>' ,error);
+      if (error) {
+        push("/");
+        return;
+      }
+
+      // if the error did not happen, if everything is alright
+      setIsSuccess(true);
+    })();
+  }, [push]);
+
+  if (!isSuccess) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
@@ -230,6 +255,24 @@ const SidebarWithHeader = ({children}) => {
       </Box>
     </Box>
   )
+}
+
+async function getUser(): Promise<UserResponse> {
+  try {
+    const { data } = await axios.get("/api/auth/me");
+
+    return {
+      user: data,
+      error: null,
+    };
+  } catch (e) {
+    const error = e as AxiosError;
+
+    return {
+      user: null,
+      error,
+    };
+  }
 }
 
 export default SidebarWithHeader
