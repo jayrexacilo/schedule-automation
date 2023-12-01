@@ -256,7 +256,7 @@ const Content = () => {
                 <Select
                   isRequired
                   {...selectTeacherProps}
-                  options={teachers.map(i => ({label: i.firstname+' - '+i.lastname, value: i.id}))}
+                  options={teachers.map(i => ({label: i.teacher_id+' - '+i.firstname+' '+i.lastname, value: i.id}))}
                   //name="teachers"
                   //onChange={value => setSelectedTeacher(value)}
                   //value={selectedTeacher?.value || ''}
