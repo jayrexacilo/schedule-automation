@@ -118,7 +118,7 @@ const Content = () => {
     setSubjects([]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if(data.filter(i => i.subject.value === selectedSubject.value)?.length) {
       toast({
@@ -131,6 +131,23 @@ const Content = () => {
       return;
     }
     if(selectedTeacher && selectedSubject) {
+      const validate = await fetch('/api/schedules/validate', {
+        method: 'POST',
+        body: JSON.stringify({teacher_id: selectedTeacher.value, subject_id: selectedSubject.value})
+      });
+      const validated = await validate.json();
+
+      if(validated?.length) {
+        toast({
+          title: 'Schedule already exist.',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+          position: 'top'
+        })
+        return;
+      }
+
       let newData = data?.length ? data : [];
       newData.push({
         teacher: selectedTeacher,
