@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useState } from 'react';
 import {
   Box,
   Flex,
@@ -16,6 +17,7 @@ import {
   IconProps,
   Icon,
 } from '@chakra-ui/react'
+import { useRouter } from 'next/navigation';
 
 const avatars = [
   {
@@ -62,6 +64,15 @@ const Blur = (props: IconProps) => {
 }
 
 export default function JoinOurTeam() {
+  const { push } = useRouter();
+  const [formData, setFormData] = useState({
+    teacherId: '',
+    firstname: '',
+    lastname: ''
+  });
+
+  const handleChange = e => setFormData({...formData, [e.target.name]: e.target.value})
+
   return (
     <Box position={'relative'}>
       <Container
@@ -74,11 +85,11 @@ export default function JoinOurTeam() {
           <Heading
             lineHeight={1.1}
             fontSize={{ base: '3xl', sm: '4xl', md: '5xl', lg: '6xl' }}>
-            Senior web designers{' '}
-            <Text as={'span'} bgGradient="linear(to-r, red.400,pink.400)" bgClip="text">
+            School Name Here{' '}
+            {/*<Text as={'span'} bgGradient="linear(to-r, red.400,pink.400)" bgClip="text">
               &
-            </Text>{' '}
-            Full-Stack Developers
+            </Text>{' '}*/}
+            Teachers Scheduling System
           </Heading>
           <Stack direction={'row'} spacing={4} align={'center'}>
             <AvatarGroup>
@@ -147,18 +158,26 @@ export default function JoinOurTeam() {
               color={'gray.800'}
               lineHeight={1.1}
               fontSize={{ base: '2xl', sm: '3xl', md: '4xl' }}>
-              Sign
+              Teachers Sign in
               <Text as={'span'} bgGradient="linear(to-r, red.400,pink.400)" bgClip="text">
                 !
               </Text>
             </Heading>
-            <Text color={'gray.500'} fontSize={{ base: 'sm', sm: 'md' }}>
-              We’re looking for amazing engineers just like you! Become a part of our
-              rockstar engineering team and skyrocket your career!
-            </Text>
+            <Text color={'gray.500'} fontSize={{ base: 'sm', sm: 'md' }}>Enter details below to view your schedules</Text>
           </Stack>
           <Box as={'form'} mt={10}>
             <Stack spacing={4}>
+              <Input
+                placeholder="ID number"
+                bg={'gray.100'}
+                border={0}
+                color={'gray.500'}
+                _placeholder={{
+                  color: 'gray.500',
+                }}
+                onChange={handleChange}
+                name="teacherId"
+              />
               <Input
                 placeholder="Firstname"
                 bg={'gray.100'}
@@ -167,30 +186,23 @@ export default function JoinOurTeam() {
                 _placeholder={{
                   color: 'gray.500',
                 }}
+                onChange={handleChange}
+                name="firstname"
               />
               <Input
-                placeholder="firstname@lastname.io"
+                placeholder="Lastname"
                 bg={'gray.100'}
                 border={0}
                 color={'gray.500'}
                 _placeholder={{
                   color: 'gray.500',
                 }}
+                onChange={handleChange}
+                name="lastname"
               />
-              <Input
-                placeholder="+1 (___) __-___-___"
-                bg={'gray.100'}
-                border={0}
-                color={'gray.500'}
-                _placeholder={{
-                  color: 'gray.500',
-                }}
-              />
-              <Button fontFamily={'heading'} bg={'gray.200'} color={'gray.800'}>
-                Upload CV
-              </Button>
             </Stack>
             <Button
+              onClick={e => push(`/schedules?id=${formData.teacherId}&firstname=${formData.firstname}&lastname${formData.lastname}`)}
               fontFamily={'heading'}
               mt={8}
               w={'full'}
